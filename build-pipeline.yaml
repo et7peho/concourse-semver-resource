@@ -16,7 +16,7 @@ jobs:
 
 resource_types:
   - name: semver-image-resource
-    type: semver-image
+    type: semver-resource
     source:
        insecure_registries: ["docker.egira.saab.se:5000"]
        repository: docker.egira.saab.se:5000/semver-resource
@@ -40,7 +40,7 @@ resources:
        check_every: 5s
 
   - name: semver-resource-version
-    type: semver-image
+    type: semver-resource
     source:
        uri: ((git-repo))
        branch: ((git-branch))
