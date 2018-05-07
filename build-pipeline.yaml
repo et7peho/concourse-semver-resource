@@ -19,7 +19,7 @@ resource_types:
     type: semver-image
     source:
        insecure_registries: ["docker.egira.saab.se:5000"]
-       repository: docker.egira.saab.se:5000/semver-image-resource
+       repository: docker.egira.saab.se:5000/semver-resource
        tag: v0.0.1
 
   - name: docker-image-resource
