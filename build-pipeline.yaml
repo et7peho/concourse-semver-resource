@@ -1,34 +1,20 @@
 ---
-
-jobs:
-- name: build-echo-server-image
-  plan:
-     - get: semver-resource
-       trigger: true
-     - get: semver-resource-version
-       params:
-         bump: patch
-     - put: semver-resource-image
-       params:
-         build: semver-resource
-         tag_as_latest: true
-     - put: semver-resource-version
-
 resource_types:
+  #  - name: docker-image-resource
+  #  type: docker-image
+  #  privileged: true
+  #  source:
+  #     insecure_registries: ["docker.egira.saab.se:5000"]
+  #     repository: docker.egira.saab.se:5000/docker-image-resource
+  #     tag: v0.0.15
+
   - name: semver-image-resource
-    type: semver-resource
+    type: docker-image
     source:
        insecure_registries: ["docker.egira.saab.se:5000"]
-       repository: docker.egira.saab.se:5000/semver-resource
+       repository: docker.egira.saab.se:5000/semver-concourse-resource
        tag: v0.0.1
 
-  - name: docker-image-resource
-    type: docker-image
-    privileged: true
-    source:
-       insecure_registries: ["docker.egira.saab.se:5000"]
-       repository: docker.egira.saab.se:5000/docker-image-resource
-       tag: v0.0.15
 
 resources:
   - name: semver-resource
@@ -40,18 +26,31 @@ resources:
        check_every: 5s
 
   - name: semver-resource-version
-    type: semver-resource
+    type: semver-image-resource
     source:
        uri: ((git-repo))
        branch: ((git-branch))
        private_key: ((private_repo_key))
-       file: version
 
   - name: semver-resource-image
-    type: docker-image-resource
+    type: docker-image
     source:
        insecure_registries: ["((registry))"]
-       repository: ((registry))/semver-resource-image
+       repository: ((registry))/semver-resource
        username: {{registry-user}}
        password: {{registry-password}}
-       tag: semver-resource-version/version
+       #      tag_from_file: semver-resource-version/version
+jobs:
+- name: build-echo-server-image
+  plan:
+     - get: semver-resource
+       trigger: true
+     - get: semver-resource-version
+       params:
+          bump: patch
+     - put: semver-resource-image
+       params:
+         build: semver-resource
+         tag_as_latest: true
+     - put: semver-resource-version
+
