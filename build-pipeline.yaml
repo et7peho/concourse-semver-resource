@@ -1,5 +1,13 @@
 ---
 resource_types:
+  - name: semver-image-resource
+    type: semver-image
+    #    privileged: true
+    source:
+       insecure_registries: ["docker.egira.saab.se:5000"]
+       repository: docker.egira.saab.se:5000/semver-image-resource
+       tag: latest
+
   - name: docker-image-resource
     type: docker-image
     privileged: true
@@ -17,6 +25,14 @@ resources:
        branch: ((git-branch))
        private_key: ((private_repo_key))
        check_every: 5s
+  
+  - name: semver-resource-version
+    type: semver-image
+    source:
+       uri: ((git-repo))
+       branch: ((git-branch))
+       private_key: ((private_repo_key))
+       file: version
 
   - name: semver-resource-image
     type: docker-image-resource
@@ -25,12 +41,18 @@ resources:
        repository: ((registry))/semver-resource-image
        username: {{registry-user}}
        password: {{registry-password}}
+       tag: semver-resource-version/version
 
 jobs:
 - name: build-echo-server-image
   plan:
      - get: semver-resource
        trigger: true
+     - get: semver-resource-version
+       params:
+         bump: patch
      - put: semver-resource-image
        params:
          build: semver-resource
+         tag_as_latest: true
+     - put: semver-resource-version
