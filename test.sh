@@ -71,3 +71,13 @@ jq -n "{
     private_key: \"$KEY\"
   },
 }" | /opt/resource/out /tmp/t6est
+
+jq -n "{
+  source: {
+    uri: \"ssh://git@git.work:23/peter/semver-test.git\",
+    branch: \"master\",
+    name: \"Kalle Karlsson\",
+    mail: \"kalle.karlsson@mail.com\",
+    private_key: \"$KEY\"
+  },
+}" | /opt/resource/check /tmp/t4est

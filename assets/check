@@ -1,0 +1,65 @@
+#!/bin/bash
+# vim: set ft=sh
+
+set -e
+set -x
+
+exec 3>&1 # make stdout available as fd 3 for the result
+exec 1>&2 # redirect all output to stderr for logging
+
+source $(dirname $0)/common.sh
+
+destination=$1
+
+if [ -z "$destination" ]; then
+  echo "usage: $0 <path/to/destination>" >&2
+  exit 1
+fi
+
+# for jq
+PATH=/usr/local/bin:$PATH
+
+payload=$(mktemp $TMPDIR/git-resource-request.XXXXXX)
+
+cat > $payload <&0
+
+load_pubkey $payload
+load_git_crypt_key $payload
+configure_https_tunnel $payload
+configure_git_ssl_verification $payload
+configure_credentials $payload
+
+uri=$(jq -r '.source.uri // ""' < $payload)
+branch=$(jq -r '.source.branch // "master"' < $payload)
+file=$(jq -r '.source.file // "version"' < $payload)
+bump=$(jq -r '.params.bump // ""' < $payload)
+initial_version=$(jq -r '.source.initial_version // "0.0.1"' < $payload)
+
+if [ -z "$uri" ]; then
+  echo "invalid payload (missing uri):" >&2
+  cat $payload >&2
+  exit 1
+fi
+
+branchflag=""
+if [ -n "$branch" ]; then
+  branchflag="--branch $branch ${branch}-version"
+fi
+
+git clone $uri $destination
+cd $destination
+#git fetch origin ${branch}:${branch}
+#git fetch origin ${branch}-version:${branch}-version
+git checkout ${branch}-version
+if [ ! -z "$file" ] && [ -f "$file" ]
+then
+  CURRENT_VERSION=$(head -n 1 $file)
+else
+  CURRENT_VERSION=$initial_version
+fi
+GIT_VERSION=$(tail -n 1 $file)
+
+jq -n "{
+  number: \"$CURRENT_VERSION\",
+  version: \"$GIT_VERSION\"
+}" >&3
