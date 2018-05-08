@@ -12,6 +12,8 @@ resource_types:
     type: docker-image
     source:
        repository: et7peho/concourse-semver-resource
+       username: {{registry-user}}
+       password: {{registry-password}}
        tag: v0.0.1
 
 
@@ -19,17 +21,17 @@ resources:
   - name: semver-resource
     type: git
     source:
-       uri: ((git-repo))
+       uri: ((git-repo-ssh))
        branch: ((git-branch))
-       private_key: ((private_repo_key))
+       #       private_key: ((private_repo_key))
        check_every: 5s
 
   - name: semver-resource-version
     type: semver-image-resource
     source:
-       uri: ((git-repo))
+       uri: ((git-repo-https))
        branch: ((git-branch))
-       private_key: ((private_repo_key))
+       #       private_key: ((private_repo_key))
 
   - name: semver-resource-image
     type: docker-image
