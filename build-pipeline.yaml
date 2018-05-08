@@ -11,8 +11,7 @@ resource_types:
   - name: semver-image-resource
     type: docker-image
     source:
-       insecure_registries: ["docker.egira.saab.se:5000"]
-       repository: docker.egira.saab.se:5000/semver-concourse-resource
+       repository: et7peho/concourse-semver-resource
        tag: v0.0.1
 
 
@@ -35,8 +34,8 @@ resources:
   - name: semver-resource-image
     type: docker-image
     source:
-       insecure_registries: ["((registry))"]
-       repository: ((registry))/semver-resource
+            #       insecure_registries: ["((registry))"]
+       repository: et7peho/concourse-semver-resource
        username: {{registry-user}}
        password: {{registry-password}}
        #      tag_from_file: semver-resource-version/version
